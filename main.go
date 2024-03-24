@@ -1,8 +1,13 @@
 package main
 
 import (
-	"fmt"
+	"github.com/jyu/routers"
+	"github.com/jyu/utils"
 )
-func main()  {
-	fmt.Println("hello jyu")
+
+func main(){
+	utils.InitConfig()
+	utils.InitMySQL()
+	r := routers.Router()
+	r.Run()
 }

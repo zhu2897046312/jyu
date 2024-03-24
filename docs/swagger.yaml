@@ -1,0 +1,62 @@
+info:
+  contact: {}
+paths:
+  /User/DeleteUserHandler:
+    get:
+      parameters:
+      - description: 账户
+        in: query
+        name: account
+        type: string
+      - description: 密码
+        in: query
+        name: password
+        type: string
+      responses:
+        "200":
+          description: code", "masssge"}
+          schema:
+            type: string
+      tags:
+      - 删除模块
+  /User/createUserHandler:
+    get:
+      parameters:
+      - description: 账户
+        in: query
+        name: account
+        type: string
+      - description: 密码
+        in: query
+        name: password
+        type: string
+      - description: 确认密码
+        in: query
+        name: repassword
+        type: string
+      responses:
+        "200":
+          description: code", "masssge"}
+          schema:
+            type: string
+      tags:
+      - 用户模块
+  /User/getUserList:
+    get:
+      responses:
+        "200":
+          description: code", "masssge"}
+          schema:
+            type: string
+      tags:
+      - 用户模块
+  /index:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      tags:
+      - 首页
+swagger: "2.0"
