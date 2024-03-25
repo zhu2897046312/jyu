@@ -7,7 +7,6 @@ import (
 	"github.com/jyu/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"fmt"
 )
 
 func TestGorm(t *testing.T){
@@ -19,12 +18,4 @@ func TestGorm(t *testing.T){
 
 	db.AutoMigrate(&models.UserBasic{})
 
-	user := &models.UserBasic{}
-	user.Account = "221110137"
-
-	db.Create(user)
-
-	fmt.Println(db.First(user), 1)
-
-	db.Model(user).Update("password","1234")
 }

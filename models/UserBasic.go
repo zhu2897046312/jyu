@@ -10,16 +10,17 @@ import (
 
 type UserBasic struct {
 	gorm.Model
-	Account       string
+	Account       string `gorm:"unique"`
 	Password      string
-	Email         string	//`valid:"email"`
-	Phone         string	//`valid:"matches(^1[3-9]{1}\\d{9}$)"`
+	Salt          string
+	Email         string `valid:"email"`
+	Phone         string `valid:"matches(^1[3-9]{1}\\d{9}$)"`
 	Identity      string
 	ClientIp      string
 	ClientPort    string
-	LoginTime     time.Time 
-	HeartbeatTime time.Time 
-	LoginOutTime  time.Time 
+	LoginTime     time.Time
+	HeartbeatTime time.Time
+	LoginOutTime  time.Time
 	IsLogOut      bool
 	DeviceInfo    string
 }
@@ -38,10 +39,10 @@ func GetUserList() []*UserBasic {
 	return data
 }
 
-func FindUserByAccount(account string) (UserBasic , error) {
+func FindUserByAccount(account string) (UserBasic, error) {
 	var data UserBasic
-	 err := utils.DB.Where("account = ?", account).First(&data).Error
-	 return data, err
+	err := utils.DB.Where("account = ?", account).First(&data).Error
+	return data, err
 }
 
 func CreateUser(user UserBasic) *gorm.DB {
@@ -53,5 +54,17 @@ func DeleteUser(user UserBasic) *gorm.DB {
 }
 
 func UpdateUser(user UserBasic) *gorm.DB {
-	return utils.DB.Where("account = ?", user.Account).Model(user).Updates(UserBasic{Password: user.Password, Email: user.Email, Phone: user.Phone})
+	return utils.DB.Where("account = ?", user.Account).Model(user).Updates(UserBasic{Email: user.Email, Phone: user.Phone})
+}
+
+func UpdatePassword(user UserBasic) *gorm.DB {
+	return utils.DB.Where("account = ?", user.Account).Model(user).Updates(UserBasic{Password: user.Password})
+}
+
+func UpdateEmail(user UserBasic) *gorm.DB {
+	return utils.DB.Where("account = ?", user.Account).Model(user).Updates(UserBasic{Email: user.Email})
+}
+
+func UpdatePhone(user UserBasic) *gorm.DB {
+	return utils.DB.Where("account = ?", user.Account).Model(user).Updates(UserBasic{Phone: user.Phone})
 }

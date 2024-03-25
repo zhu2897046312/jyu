@@ -1,18 +1,21 @@
 package service
 
 import (
+	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jyu/models"
+	"github.com/jyu/utils"
 )
 
 // GetUserListHandle
 // @Tags 用户模块
 // @Success 200 {string} {"code", "masssge"}
-// @Router /User/getUserList [get]
+// @Router /User/getUserList [GET]
 func GetUserListHandler(c *gin.Context) {
 
 	data := make([]*models.UserBasic, 10)
@@ -23,17 +26,15 @@ func GetUserListHandler(c *gin.Context) {
 	})
 }
 
-// CreateUserHandler
+// RegisterHandler
 // @Tags 用户模块
 // @param account query string false "账户"
 // @param password query string false "密码"
 // @param repassword query string false "确认密码""
 // @Success 200 {string} {"code", "masssge"}
 // @Router /User/createUserHandler [POST]
-func CreateUserHandler(c *gin.Context) {
+func RegisterHandler(c *gin.Context) {
 	user := models.UserBasic{}
-	// user.Account = c.Query("account")
-	// user.Password = c.Query("password")
 	if err := c.BindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"masssge": err.Error(),
@@ -41,15 +42,18 @@ func CreateUserHandler(c *gin.Context) {
 		return
 	}
 	log.Println(user)
-
 	data, _ := models.FindUserByAccount(user.Account)
 	log.Println(data)
-	if  data.Account != "" {
+	if data.Account != "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"masssge": "账户已存在",
 		})
-	    return
+		return
 	}
+
+	user.Salt = fmt.Sprintf("%06",rand.Int31())
+	user.Password = utils.MakePassword(user.Password,user.Salt)
+
 	if user.LoginTime.IsZero() {
 		user.LoginTime = time.Now()
 	}
@@ -59,11 +63,17 @@ func CreateUserHandler(c *gin.Context) {
 	if user.LoginOutTime.IsZero() {
 		user.LoginOutTime = time.Now()
 	}
-	models.CreateUser(user)
-	c.JSON(http.StatusOK, gin.H{
-		"masssge": "新增用户成功",
-	})
-
+	db := models.CreateUser(user)
+	if db.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+            "masssge": "新增用户失败",
+        })
+        return
+	}else{
+		c.JSON(http.StatusOK, gin.H{
+			"masssge": "新增用户成功",
+		})
+	}
 }
 
 // DeleteUserHandler
@@ -71,8 +81,8 @@ func CreateUserHandler(c *gin.Context) {
 // @param account query string false "账户"
 // @param password query string false "密码"
 // @Success 200 {string} {"code", "masssge"}
-// @Router /User/deleteUserHandler [get]
-func DeleteUserHandler(c *gin.Context) {
+// @Router /User/deleteUserHandler [GET]
+func LogoutHandler(c *gin.Context) {
 	user := models.UserBasic{}
 	if err := c.BindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -80,10 +90,24 @@ func DeleteUserHandler(c *gin.Context) {
 		})
 		return
 	}
-	models.DeleteUser(user)
-	c.JSON(http.StatusOK, gin.H{
-		"masssge": "删除用户成功",
-	})
+	data, _ := models.FindUserByAccount(user.Account)
+	log.Println(data)
+	if data.Account != "" {
+		db  := models.DeleteUser(user)
+		if db.Error != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"masssge": "删除用户失败",
+			})
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"masssge": "删除用户成功",
+		})
+	}else{
+		c.JSON(http.StatusBadRequest, gin.H{
+            "masssge": "账户不存在",
+        })
+	}
+
 }
 
 func UpdateUserHandler(c *gin.Context) {
@@ -95,8 +119,53 @@ func UpdateUserHandler(c *gin.Context) {
 		return
 	}
 	log.Println(user)
-	models.UpdateUser(user)
+	db := models.UpdateUser(user)
+	if db.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+            "masssge": "更新用户失败",
+        })
+        return
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"masssge": "更新成功",
 	})
+}
+
+func LoginHandler(c *gin.Context) {
+	user := models.UserBasic{}
+	if err := c.BindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"masssge": err.Error(),
+		})
+		return
+	}
+
+	data, _ := models.FindUserByAccount(user.Account)
+	if data.Account == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"masssge": "账户不存在",
+		})
+		return
+	}
+	flag := utils.ValidPassword(user.Password, data.Salt, data.Password)
+	
+	if flag {
+		// user.LoginTime = time.Now()
+        // user.HeartbeatTime = time.Now()
+        // user.LoginOutTime = time.Now()
+        // db := models.UpdateUser(user)
+        // if db.Error != nil {
+        //     c.JSON(http.StatusBadRequest, gin.H{
+        //         "masssge": "登录失败",
+        //     })
+        //     return
+        // }
+        c.JSON(http.StatusOK, gin.H{
+            "masssge": "登录成功",
+        })
+	}else{
+		c.JSON(http.StatusBadRequest, gin.H{
+            "masssge": "密码错误",
+        })
+	}
 }
