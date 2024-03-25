@@ -20,5 +20,7 @@ func Router() *gin.Engine{
 	r.GET("/User/LogoutHandler",service.LogoutHandler)
 	r.POST("/User/UpdateUserHandler",service.UpdateUserHandler)
 	r.POST("/User/LoginHandler",service.LoginHandler)
+	
+	r.GET("/User/SendMsg",service.SendMsg)
 	return r
 }

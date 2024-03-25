@@ -3,7 +3,7 @@ package models
 import (
 	"log"
 	"time"
-
+	"strconv"
 	"github.com/jyu/utils"
 	"gorm.io/gorm"
 )
@@ -31,7 +31,7 @@ func (table *UserBasic) TableNanme() string {
 
 func GetUserList() []*UserBasic {
 	data := make([]*UserBasic, 10)
-	utils.DB.Find(&data)
+	utils.DB_MySQL.Find(&data)
 
 	for _, v := range data {
 		log.Println(v)
@@ -41,30 +41,35 @@ func GetUserList() []*UserBasic {
 
 func FindUserByAccount(account string) (UserBasic, error) {
 	var data UserBasic
-	err := utils.DB.Where("account = ?", account).First(&data).Error
+	err := utils.DB_MySQL.Where("account = ?", account).First(&data).Error
 	return data, err
 }
 
 func CreateUser(user UserBasic) *gorm.DB {
-	return utils.DB.Create(&user)
+	return utils.DB_MySQL.Create(&user)
 }
 
 func DeleteUser(user UserBasic) *gorm.DB {
-	return utils.DB.Where("account = ?", user.Account).Delete(&UserBasic{})
+	return utils.DB_MySQL.Where("account = ?", user.Account).Delete(&UserBasic{})
 }
 
 func UpdateUser(user UserBasic) *gorm.DB {
-	return utils.DB.Where("account = ?", user.Account).Model(user).Updates(UserBasic{Email: user.Email, Phone: user.Phone})
+	return utils.DB_MySQL.Where("account = ?", user.Account).Model(user).Updates(UserBasic{Email: user.Email, Phone: user.Phone})
 }
 
 func UpdatePassword(user UserBasic) *gorm.DB {
-	return utils.DB.Where("account = ?", user.Account).Model(user).Updates(UserBasic{Password: user.Password})
+	return utils.DB_MySQL.Where("account = ?", user.Account).Model(user).Updates(UserBasic{Password: user.Password})
 }
 
 func UpdateEmail(user UserBasic) *gorm.DB {
-	return utils.DB.Where("account = ?", user.Account).Model(user).Updates(UserBasic{Email: user.Email})
+	return utils.DB_MySQL.Where("account = ?", user.Account).Model(user).Updates(UserBasic{Email: user.Email})
 }
 
 func UpdatePhone(user UserBasic) *gorm.DB {
-	return utils.DB.Where("account = ?", user.Account).Model(user).Updates(UserBasic{Phone: user.Phone})
+	return utils.DB_MySQL.Where("account = ?", user.Account).Model(user).Updates(UserBasic{Phone: user.Phone})
+}
+
+func UpdateIdentity(user UserBasic) *gorm.DB {
+	tmp := utils.MD5EnCode(strconv.FormatInt(time.Now().Unix(), 10))
+	return utils.DB_MySQL.Where("account = ?", user.Account).Model(&user).Update("identity", tmp)
 }

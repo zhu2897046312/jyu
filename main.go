@@ -5,9 +5,11 @@ import (
 	"github.com/jyu/utils"
 )
 
-func main(){
-	utils.InitConfig()
+func main() {
+	utils.InitConfig("")
 	utils.InitMySQL()
+	utils.InitRedis()
 	r := routers.Router()
 	r.Run()
+
 }
