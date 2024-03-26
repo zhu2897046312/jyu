@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jyu/models"
 )
 
 // GetIndexHandle
@@ -14,4 +15,8 @@ func GetIndexHandler(c *gin.Context){
 	c.JSON(http.StatusOK,gin.H{
 		"masssge": "welcome",
 	})
+}
+
+func Chat(c*gin.Context){
+	models.Chat(c.Writer, c.Request)
 }

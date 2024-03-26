@@ -46,6 +46,14 @@ func RegisterHandler(c *gin.Context) {
 		})
 		return
 	}
+	if user.Account == "" || user.Password == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    0,
+			"masssge": "账户和密码不能为空",
+			"data":    user,
+		})
+		return
+	}
 	log.Println(user)
 	data, _ := models.FindUserByAccount(user.Account)
 	log.Println(data)
@@ -230,6 +238,7 @@ func SendMsg(c *gin.Context) {
 
 	MsgHandler(ws, c)
 }
+
 // 死循环 噢
 func MsgHandler(ws *websocket.Conn, c *gin.Context) {
 	for {
@@ -251,4 +260,23 @@ func MsgHandler(ws *websocket.Conn, c *gin.Context) {
 
 func SendUserMsg(c *gin.Context) {
 	models.Chat(c.Writer, c.Request)
+}
+
+func SearchFriends(c *gin.Context) {
+	log.Println(c.Query("account"))
+	data, err := models.SearchFriend(c.Query("account"))
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"masssge": "查询失败",
+			"data":    nil,
+		})
+		return
+	}
+	// c.JSON(http.StatusOK, gin.H{
+	// 	"code":    0,
+	// 	"masssge": "查询成功",
+	// 	"data":    data,
+	// })
+	utils.RespOKList(c.Writer,data,len(data))
 }
