@@ -280,3 +280,17 @@ func SearchFriends(c *gin.Context) {
 	// })
 	utils.RespOKList(c.Writer,data,len(data))
 }
+
+
+func AddFriend(c *gin.Context) {
+	owner_id := c.Query("owner_id")
+	target_id := c.Query("target_id")
+	is_success, err := models.AddFriend(owner_id, target_id)
+	if err!= nil {
+		utils.RespFailed(c.Writer, "AddFriend 失败")
+	}
+	if is_success {
+		utils.RespOK(c.Writer,nil,"Successfully added")
+	}
+}
+

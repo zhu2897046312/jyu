@@ -14,15 +14,15 @@ import (
 
 type Message struct {
 	gorm.Model
-	FormID      string //发送者
-	TargetID    string //接收者
-	ChatType        int    //消息类型 群聊 、 私聊 、 广播
-	Media       int    //消息类型 文字、图片、音频
-	Context     string //消息内容
-	Pic         string
-	Url         string
-	Description string
-	Amount      int
+	FormID      string `json:"from_id"`   //发送者
+	TargetID    string `json:"target_id"` //接收者
+	ChatType    int    `json:"chat_type"` //消息类型 群聊 、 私聊 、 广播
+	Media       int    `json:"media"`     //消息类型 文字、图片、音频
+	Context     string `json:"context"`   //消息内容
+	Pic         string `json:"pic"`
+	Url         string `json:"url"`
+	Description string `json:"description"`
+	Amount      int    `json:"amount"`
 }
 
 type Node struct {
@@ -83,7 +83,7 @@ func Chat(writer http.ResponseWriter, request *http.Request) {
 
 	// 启动接收处理 goroutine
 	go recvProc(node)
-	
+
 	sendMsg(account, []byte("hello"))
 
 }
@@ -181,7 +181,6 @@ func udpRecvProc() {
 	for {
 		var buf [512]byte            // 创建一个大小为 512 字节的缓冲区
 		n, err := conn.Read(buf[0:]) // 读取 UDP 数据包到缓冲区中
-		log.Println("this is udpRecvProc ")
 		if err != nil {
 			log.Println(err) // 若读取数据出错，则打印错误信息
 			return           // 退出接收处理函数
@@ -192,21 +191,21 @@ func udpRecvProc() {
 }
 
 // dispatch 函数用于根据接收到的消息类型进行分发处理
+/**
+	models 绑定json 解决反序列化失败 ---bug 
+*/
 func dispatch(data []byte) {
-	msg := Message{}           // 创建一个空的 Message 结构体
-	json.Unmarshal(data, &msg) // 解析接收到的 JSON 数据到 Message 结构体中
-
+	msg := Message{}                  // 创建一个空的 Message 结构体
+	err := json.Unmarshal(data, &msg) // 解析接收到的 JSON 数据到 Message 结构体中
+	if err != nil {
+		log.Println(err) // 若解析数据出错，则打印错误信息
+		return           // 退出分发处理函数
+	}
 	switch msg.ChatType {
 	case 1: // 如果消息类型为 1
-		log.Println("this is dispatch data: ", string(data))
+
 		sendMsg(msg.TargetID, data) // 调用 sendMsg 函数发送消息给指定账户
 	}
-
-	// log.Println("dispath(): ---- ",data)
-	// if err != nil {
-	// 	log.Println("dispath(): " , err)
-	// 	return
-	// }
 }
 
 // sendMsg 函数用于向指定账户发送消息

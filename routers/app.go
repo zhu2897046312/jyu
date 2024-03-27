@@ -16,14 +16,16 @@ func Router() *gin.Engine{
 	r.GET("/swagger/*any",ginSwagger.WrapHandler(swaggerfiles.Handler))
 	r.GET("/index",service.GetIndexHandler)
 	r.GET("/User/getUserList",service.GetUserListHandler)
-	r.POST("/User/RegisterHandler",service.RegisterHandler)
 	r.GET("/User/LogoutHandler",service.LogoutHandler)
-	r.POST("/User/UpdateUserHandler",service.UpdateUserHandler)
-	r.POST("/User/LoginHandler",service.LoginHandler)
 	r.GET("/User/Chat",service.Chat)
 	r.GET("/User/SendMsg",service.SendMsg)
 	r.GET("/User/SendUserMsg",service.SendUserMsg)
 	r.GET("/User/SearchFriend",service.SearchFriends)
 	
+	r.POST("/User/UpdateUserHandler",service.UpdateUserHandler)
+	r.POST("/User/RegisterHandler",service.RegisterHandler)
+	r.POST("/User/LoginHandler",service.LoginHandler)
+	r.POST("/attach/Upload",service.Upload)
+	r.POST("/User/AddFriend",service.AddFriend)
 	return r
 }
