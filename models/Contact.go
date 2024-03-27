@@ -51,18 +51,30 @@ func AddFriend(owner_account string, friend_account string) (bool, error) {
 			return false, err
 		}
 		tx := utils.DB_MySQL.Begin()
-		utils.DB_MySQL.Create(&Contacts{
+		defer func () {
+			// 事务一旦开始，不论什么异常最终都会Rollback
+			if r := recover(); r!= nil {
+                tx.Rollback()
+            }
+		}()
+		if err := utils.DB_MySQL.Create(&Contacts{
 			OwnerId:     owner_account,
             TargetId:    friend_account,
             Description:  "好友",
             ChatType:    1,
-		})
-		utils.DB_MySQL.Create(&Contacts{
+		}).Error; err != nil {
+			tx.Rollback()
+			return false, err
+		}
+		if err:= utils.DB_MySQL.Create(&Contacts{
 			OwnerId:     friend_account,
             TargetId:    owner_account,
             Description:  "好友",
             ChatType:    1,
-		})
+		}).Error; err != nil{
+			tx.Rollback()
+			return false, err
+		}
 		tx.Commit()
 		return true, nil
 	}
