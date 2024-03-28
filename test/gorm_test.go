@@ -16,5 +16,5 @@ func TestGorm(t *testing.T){
 		panic("failed to connect database")
 	}
 
-	db.AutoMigrate(&models.Contacts{})
+	db.AutoMigrate(&models.Community{})
 }

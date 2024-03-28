@@ -29,8 +29,8 @@ func (table *UserBasic) TableNanme() string {
 	return "user_basic"
 }
 
-func GetUserList() []*UserBasic {
-	data := make([]*UserBasic, 10)
+func GetUserList() []UserBasic {
+	data := make([]UserBasic, 10)
 	utils.DB_MySQL.Find(&data)
 
 	for _, v := range data {

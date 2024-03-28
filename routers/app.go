@@ -21,11 +21,15 @@ func Router() *gin.Engine{
 	r.GET("/User/SendMsg",service.SendMsg)
 	r.GET("/User/SendUserMsg",service.SendUserMsg)
 	r.GET("/User/SearchFriend",service.SearchFriends)
-	
+	r.GET("/User/LoadCommunityList",service.LoadCommunityList)
+
+
 	r.POST("/User/UpdateUserHandler",service.UpdateUserHandler)
 	r.POST("/User/RegisterHandler",service.RegisterHandler)
 	r.POST("/User/LoginHandler",service.LoginHandler)
 	r.POST("/attach/Upload",service.Upload)
 	r.POST("/User/AddFriend",service.AddFriend)
+	r.POST("/User/CreateCommunity",service.CreateCommunity)
+	
 	return r
 }

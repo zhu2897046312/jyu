@@ -19,7 +19,7 @@ import (
 // @Router /User/getUserList [GET]
 func GetUserListHandler(c *gin.Context) {
 
-	data := make([]*models.UserBasic, 10)
+	data := make([]models.UserBasic, 10)
 	data = models.GetUserList()
 
 	c.JSON(http.StatusOK, gin.H{
@@ -292,5 +292,76 @@ func AddFriend(c *gin.Context) {
 	if is_success {
 		utils.RespOK(c.Writer,nil,"Successfully added")
 	}
+}
+
+func CreateCommunity(c *gin.Context){
+	community := models.Community{}
+    if err := c.BindJSON(&community); err!= nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "code":    0,
+            "masssge": err.Error(),
+            "data":    community,
+        })
+        return
+    }
+	if community.OwnerId == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+            "code":    0,
+            "masssge": "community.OwnerId不能为空",
+            "data":    community,
+        })
+        return
+	}
+	if community.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+            "code":    0,
+            "masssge": "community.Name不能为空",
+            "data":    community,
+        })
+        return
+	}
+    db := models.CreateCommunity(community)
+	if db.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+            "code":    0,
+            "masssge": "数据库---创建失败",
+            "data":    community,
+        })
+        return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"masssge": "创建成功",
+		"data":    community,
+	})
+}
+
+
+func LoadCommunityList(c *gin.Context){
+	owerId := c.Query("owner_id")
+	if len(owerId) == 0{
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    0,
+			"masssge": "owerId不能为空",
+			"data":    nil,
+		})
+		return
+	}
+	data, err := models.LoadCommunityList(owerId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    0,
+			"masssge": "数据库查找失败",
+			"data":    data,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"masssge": "创建成功",
+		"data":    data,
+	})
 }
 
